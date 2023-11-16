@@ -1,10 +1,10 @@
 import { useState } from "react";
 import SubmitButton from "./SubmitButton";
 import Textarea from "./Textarea";
-import useApi from "@/hooks/useApi";
+import useApi from "../hooks/useApi";
 import Loading from "./Loading";
 import { useEffect } from "react";
-import { localStorageController } from "@/utils/localStorageController";
+import { localStorageController } from "../utils/localStorageController";
 
 export default function Chat() {
   const [question, setQuestion] = useState("");

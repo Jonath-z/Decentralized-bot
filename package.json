@@ -15,6 +15,7 @@
     "deploy:local": "dfx deploy --network=local",
     "deploy:ic": "dfx deploy --network=ic",
     "generate": "dfx generate dfinity_js_backend",
+    "build:backend": "npx azle dfinity_js_backend",
     "gen-deploy:local": "dfx generate dfinity_js_backend && dfx deploy --network=local"
   },
   "dependencies": {
