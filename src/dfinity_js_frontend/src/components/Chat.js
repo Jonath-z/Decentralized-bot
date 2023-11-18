@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import SubmitButton from "./SubmitButton";
 import Textarea from "./Textarea";
 import useApi from "../hooks/useApi";
@@ -66,19 +66,6 @@ export default function Chat() {
   return (
     <div className="wrapper">
       <div className="container">
-        <div className="left">
-          <form>
-            <Textarea
-              content={content}
-              setContent={(value) => setContent(value)}
-            />
-            <SubmitButton
-              onClick={saveAndUpload}
-              loading={uploading}
-              disabled={uploading}
-            />
-          </form>
-        </div>
         <div className="right">
           <div className="chat active-chat">
             <div className="conversation-start"></div>

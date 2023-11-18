@@ -1,3 +1,4 @@
+import React from "react";
 const TextInput = ({ value, onChange, placeholder }) => {
   return (
     <input

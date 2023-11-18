@@ -1,3 +1,4 @@
+import React from "react";
 export default function Textarea({ content, setContent }) {
   return (
     <section className="pane editor">

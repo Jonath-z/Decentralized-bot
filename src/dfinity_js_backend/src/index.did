@@ -1,0 +1,9 @@
+service: () -> {
+    addMessageToConversation: (variant {conversationId:text; message:record {content:text; source:text}}) -> (variant {Ok:record {id:text; content:text; source:text}; Err:variant {message:text}});
+    createConversation: (variant {convetionId:text}) -> (variant {Ok:variant {convetionId:text}; Err:variant {message:text}});
+    deleteConversation: (text) -> (variant {Ok:text; Err:variant {message:text}});
+    deleteMessage: (variant {messageId:text; conversationId:text}) -> (variant {Ok:text; Err:variant {message:text}});
+    getConversationById: (text) -> (variant {Ok:record {id:text; content:text; source:text}; Err:variant {message:text}}) query;
+    getConversations: () -> (vec record {id:text; content:text; source:text}) query;
+    updateMessage: (variant {content:text; messageId:text; conversationId:text}) -> (variant {Ok:variant {content:text; messageId:text; conversationId:text}; Err:variant {message:text}});
+}

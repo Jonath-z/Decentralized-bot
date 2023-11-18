@@ -61,17 +61,14 @@ export default Canister({
     return conversationStorage.values();
   }),
 
-  getConversationById: query(
-    [text],
-    Result(Vec(Message), ErrorMessage),
-    (id) => {
-      const messages = conversationStorage.get(id);
-      if ("None" in messages) {
-        return Err({ message: `No conversation found for ${id}` });
-      }
-      return messages;
+  getConversationById: query([text], Result(Message, ErrorMessage), (id) => {
+    const messages = conversationStorage.get(id);
+    console.log({ messages });
+    if ("None" in messages) {
+      return Err({ message: `No conversation found for ${id}` });
     }
-  ),
+    return messages;
+  }),
 
   createConversation: update(
     [ConversationPayload],
@@ -80,8 +77,8 @@ export default Canister({
       if (typeof payload !== "object" || Object.keys(payload).length === 0) {
         return Err({ message: "Invild payload" });
       }
-
-      conversationStorage.insert(payload.convetionId, systemMessage);
+      const message = { ...systemMessage, id: uuidv4() };
+      conversationStorage.insert(payload.convetionId, message);
       return Ok(payload);
     }
   ),

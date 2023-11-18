@@ -1,5 +1,6 @@
 import React from "react";
-import "./App.css";
+// import "./App.css";
+import "./index.css";
 import Chat from "./components/Chat";
 import Wallet from "./components/Wallet";
 import coverImg from "./assets/img/sandwich.jpg";
@@ -12,15 +13,15 @@ const App = function AppWrapper() {
   const isAuthenticated = window.auth.isAuthenticated;
   const principal = window.auth.principalText;
 
-  const [balance, setBalance] = useState("0");
+  const [balance, setBalance] = React.useState("0");
 
-  const getBalance = useCallback(async () => {
+  const getBalance = React.useCallback(async () => {
     if (isAuthenticated) {
       setBalance(await principalBalance());
     }
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     getBalance();
   }, [getBalance]);
 

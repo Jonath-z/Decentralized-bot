@@ -1,3 +1,4 @@
+import React from "react";
 import Loading from "./Loading";
 
 const SubmitButton = ({ onClick, loading }) => {
