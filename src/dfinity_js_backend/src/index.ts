@@ -28,58 +28,53 @@ const BaseMessage = Record({
   content: text,
 });
 
-const ConversationPayload = Variant({ convetionId: text });
+const ConversationPayload = Variant({ userIdentity: text });
 
-const AddMessgeToConversationPayload = Variant({
+const AddMessgeToConversationPayload = Record({
+  userIdentity: text,
   conversationId: text,
   message: BaseMessage,
 });
 
-const UpdateMessagePayload = Variant({
-  messageId: text,
-  conversationId: text,
-  content: text,
-});
-
-const DeleteMessagePayload = Variant({
-  messageId: text,
-  conversationId: text,
+const Conversation = Record({
+  id: text,
+  conversation: Vec(Message),
 });
 
 const ErrorMessage = Variant({ message: text });
 
 /**
- * Create a storage for conversation
- * @param text conversation id
- * @param Message message record for a conversation
- * @param 0 memory id
+ * Storage for user's conversations
+ * @date 11/19/2023 - 3:26:30 PM
+ *
+ * @type {*}
  */
-let conversationStorage = StableBTreeMap(text, Message, 0);
+const userConversation = StableBTreeMap(text, Conversation, 1);
 
 export default Canister({
-  getConversations: query([], Vec(Message), () => {
-    return conversationStorage.values();
-  }),
-
-  getConversationById: query([text], Result(Message, ErrorMessage), (id) => {
-    const messages = conversationStorage.get(id);
-    console.log({ messages });
-    if ("None" in messages) {
-      return Err({ message: `No conversation found for ${id}` });
-    }
-    return messages;
-  }),
-
   createConversation: update(
     [ConversationPayload],
-    Result(ConversationPayload, ErrorMessage),
+    Result(Conversation, ErrorMessage),
     (payload) => {
       if (typeof payload !== "object" || Object.keys(payload).length === 0) {
         return Err({ message: "Invild payload" });
       }
       const message = { ...systemMessage, id: uuidv4() };
-      conversationStorage.insert(payload.convetionId, message);
-      return Ok(payload);
+      const conversation = { id: uuidv4(), conversation: [message] };
+      userConversation.insert(payload.userIdentity, conversation);
+      return Ok(conversation);
+    }
+  ),
+
+  // The payload is just the user identity
+  getConversations: query(
+    [text],
+    Result(Conversation, ErrorMessage),
+    (userIdentity) => {
+      if (!userIdentity)
+        return Err({ message: "Incorrect user identity found" });
+      const conversations = userConversation.get(userIdentity);
+      return Ok(conversations.Some);
     }
   ),
 
@@ -87,10 +82,10 @@ export default Canister({
     [AddMessgeToConversationPayload],
     Result(Message, ErrorMessage),
     (payload) => {
-      const messages = conversationStorage.get(payload.conversationId);
-      if ("None" in messages) {
+      const chat = userConversation.get(payload.userIdentity);
+      if ("None" in chat) {
         return Err({
-          message: `No conversation found for ${payload.conversationId}`,
+          message: `No conversation found for ${payload.userIdentity}`,
         });
       }
 
@@ -108,61 +103,33 @@ export default Canister({
         content: payload.message.content,
         id: uuidv4(),
       };
+
+      const messages = chat.Some.conversation;
       const updatedMessages = [...messages, newMessage];
-      conversationStorage.insert(payload.conversationId, updatedMessages);
+      const updatedConversation = {
+        id: payload.conversationId,
+        conversation: updatedMessages,
+      };
+      userConversation.insert(payload.userIdentity, updatedConversation);
       return Ok(newMessage);
     }
   ),
 
-  deleteConversation: update([text], Result(text, ErrorMessage), (id) => {
-    const removedConversation = conversationStorage.remove(id);
-
-    if ("None" in removedConversation) {
-      return Err({ message: `Can not delete conversation with id:${id}` });
-    }
-
-    return Ok(id);
-  }),
-
-  updateMessage: update(
-    [UpdateMessagePayload],
-    Result(UpdateMessagePayload, ErrorMessage),
-    (payload) => {
-      const messages = conversationStorage.get(payload.conversationId);
-      if ("None" in messages) {
-        return Err({
-          message: `Can not update conversation with id:${payload.messageId}`,
-        });
-      }
-
-      const updatedMessages = messages.map((message: any) =>
-        message.id === payload.messageId
-          ? { ...message, content: payload.content }
-          : message
-      );
-
-      conversationStorage.insert(payload.conversationId, updatedMessages);
-      return Ok(payload);
-    }
-  ),
-
-  deleteMessage: update(
-    [DeleteMessagePayload],
+  deleteConversation: update(
+    [text],
     Result(text, ErrorMessage),
-    (payload) => {
-      const messages = conversationStorage.get(payload.conversationId);
+    (userIdentity) => {
+      const removedConversation = userConversation.remove(userIdentity);
 
-      if ("None" in messages) {
+      if ("None" in removedConversation) {
         return Err({
-          message: `Can not update conversation with id:${payload.messageId}`,
+          message: `Can not delete conversation with for user:${userIdentity}`,
         });
       }
 
-      const udpatedMessage = messages.filter(
-        (message: any) => message.id !== payload.messageId
+      return Ok(
+        `The conversation associated to ${userIdentity} has been deleted`
       );
-      conversationStorage.insert(udpatedMessage);
-      return Ok(payload.messageId as string);
     }
   ),
 });
