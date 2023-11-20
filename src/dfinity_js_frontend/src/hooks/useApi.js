@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
-import { addMessageToConversation } from "../utils/chat";
 import { OPEN_AI_API_KEY } from "../utils/credential";
+import toast from "react-hot-toast";
+import { addMessageToConversation } from "../utils/chat";
 
 const useApi = () => {
   const [data, setData] = useState("");
@@ -27,10 +28,19 @@ const useApi = () => {
 
       const result = await response.json();
 
-      // Save the message in the backend canister
+      if (response.status !== 200) {
+        const message = result.error.message;
+        toast.error(message);
+        throw new Error(message);
+      }
+
       const assistantContent = result.choices[0].message.content;
-      // const messageToSaveFromAssistant = { content, role: "assistant" };
-      // await addMessageToConversation(messageToSaveFromAssistant);
+      const messageToSaveFromAssistant = {
+        content: assistantContent,
+        role: "assistant",
+      };
+      const res = await addMessageToConversation(messageToSaveFromAssistant);
+      console.log({ res });
       setData(assistantContent);
       setError(null);
     } catch (error) {
