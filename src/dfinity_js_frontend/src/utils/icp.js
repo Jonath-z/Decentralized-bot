@@ -1,4 +1,4 @@
-import { getMarketplaceCanister, getLedgerCanister } from "./canisterFactory";
+import { getChatCanister } from "./canisterFactory";
 import { getAuthClient } from "./auth";
 
 export async function initializeContract() {
@@ -10,6 +10,5 @@ export async function initializeContract() {
   window.auth.identity = authClient.getIdentity();
   window.auth.principal = authClient.getIdentity()?.getPrincipal();
   window.auth.principalText = authClient.getIdentity()?.getPrincipal().toText();
-  window.canister.marketplace = await getMarketplaceCanister();
-  window.canister.ledger = await getLedgerCanister();
+  window.canister.chat = await getChatCanister();
 }

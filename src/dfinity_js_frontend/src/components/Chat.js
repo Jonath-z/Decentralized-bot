@@ -1,16 +1,15 @@
 import React, { useState } from "react";
-import SubmitButton from "./SubmitButton";
-import Textarea from "./Textarea";
 import useApi from "../hooks/useApi";
 import Loading from "./Loading";
 import { useEffect } from "react";
 import { localStorageController } from "../utils/localStorageController";
+import { login, logout } from "../utils/auth";
+import toast from "react-hot-toast";
+import { addMessageToConversation } from "../utils/chat";
 
 export default function Chat() {
   const [question, setQuestion] = useState("");
-  const [content, setContent] = useState("");
-  const { data, error, loading, fetchData, uploading, embedContent, setData } =
-    useApi();
+  const { data, error, loading, chatCompletion, uploading, setData } = useApi();
   const [chatMessage, setChatMessage] = useState([]);
 
   const updateChatMessage = () => {
@@ -19,6 +18,11 @@ export default function Chat() {
   };
 
   const handleSubmit = async (event) => {
+    if (!window.auth.isAuthenticated) {
+      toast.error("You are not authenticated");
+      return;
+    }
+
     if (question) {
       event.preventDefault();
       localStorageController("chatData", [
@@ -26,15 +30,9 @@ export default function Chat() {
         { content: question, role: "user" },
       ]);
       updateChatMessage();
-      await fetchData("/api/openai", "POST", question);
+      // await addMessageToConversation({ content: question, role: "user" });
+      await chatCompletion(localStorageController("chatData"));
       setQuestion("");
-    }
-  };
-
-  const saveAndUpload = async (event) => {
-    event.preventDefault();
-    if (content.trim() !== "") {
-      await embedContent("/api/embed", "POST", content);
     }
   };
 
@@ -44,7 +42,7 @@ export default function Chat() {
       localStorageController("chatData", [
         {
           content:
-            "Hello! 👋 I'm here to transform your vectorized data into compelling stories and valuable insights.",
+            "Hello! 👋 I'm a decentralized chatbot deployed on ICP (Internet Computer Protocol) blockchain",
           role: "assistant",
         },
       ]);
@@ -54,6 +52,7 @@ export default function Chat() {
 
   useEffect(() => {
     if (data) {
+      setChatMessage((prev) => [...prev, { content: data, role: "assistant" }]);
       localStorageController("chatData", [
         ...chatMessage,
         { content: data, role: "assistant" },
@@ -65,12 +64,22 @@ export default function Chat() {
 
   return (
     <div className="wrapper">
+      <div className="wrapper-header">
+        <h1>Dai</h1>
+        <button
+          className="auth-button auth-button__hover"
+          onClick={() => (window.auth.isAuthenticated ? logout() : login())}
+        >
+          {window.auth.isAuthenticated ? "Log out" : "Login"}
+        </button>
+      </div>
       <div className="container">
         <div className="right">
           <div className="chat active-chat">
             <div className="conversation-start"></div>
             {chatMessage.map((message, index) => (
               <div
+                key={index}
                 className={`bubble ${
                   message.role === "user" ? "me" : "assistant"
                 } ${
@@ -91,7 +100,6 @@ export default function Chat() {
             )}
           </div>
           <div className="write">
-            <a href="javascript:;" className="write-link attach"></a>
             <input
               placeholder="Ask me..."
               type="text"
@@ -104,7 +112,6 @@ export default function Chat() {
                 onClick={(e) => {
                   handleSubmit(e);
                 }}
-                href="javascript:;"
                 className="write-link send"
               ></a>
             )}

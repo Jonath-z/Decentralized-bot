@@ -1,8 +1,7 @@
 import { AuthClient } from "@dfinity/auth-client";
+import { createConversation } from "./chat";
 
-// that is the url of the webapp for the internet identity.
-const IDENTITY_PROVIDER = `http://localhost:4943/?canisterId=bd3sg-teaaa-aaaaa-qaaba-cai#authorize`;
-const MAX_TTL = 7 * 24 * 60 * 60 * 1000 * 1000 * 1000;
+const MAX_TTL = BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000);
 
 export async function getAuthClient() {
   return await AuthClient.create();
@@ -15,12 +14,17 @@ export async function login() {
 
   if (!isAuthenticated) {
     await authClient?.login({
-      identityProvider: IDENTITY_PROVIDER,
+      maxTimeToLive: MAX_TTL,
       onSuccess: async () => {
         window.auth.isAuthenticated = await authClient.isAuthenticated();
+        // initialize user conversation
+        const conversation = await createConversation(
+          window.auth.principalText
+        );
+        localStorage.setItem("conversation", JSON.stringify(conversation));
+
         window.location.reload();
       },
-      maxTimeToLive: MAX_TTL,
     });
   }
 }

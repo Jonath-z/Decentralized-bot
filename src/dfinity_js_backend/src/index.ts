@@ -18,13 +18,13 @@ import { systemMessage } from "./utils/ai";
  * Message record
  */
 const Message = Record({
-  source: text,
+  role: text,
   content: text,
   id: text,
 });
 
 const BaseMessage = Record({
-  source: text,
+  role: text,
   content: text,
 });
 
@@ -93,13 +93,13 @@ export default Canister({
         typeof payload !== "object" ||
         Object.keys(payload).length === 0 ||
         !payload.message?.content ||
-        !payload.message?.source
+        !payload.message?.role
       ) {
         return Err({ message: "Invild payload" });
       }
 
       const newMessage = {
-        source: payload.message.source,
+        role: payload.message.role,
         content: payload.message.content,
         id: uuidv4(),
       };
