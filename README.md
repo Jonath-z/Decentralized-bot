@@ -17,7 +17,13 @@ After settins up the frontend creadentials, make sure to setup `dfx` in your com
 
 ## Run the app locally
 
-To run the app locally, it's simple after installing `dfx` (Definity CDK) installed, just run the following command:
+Before everything you will need to run the local replica with the following command:
+
+```bash
+    dfx start --clean
+```
+
+To run the app locally, it's simple after installing `dfx` (Definity CDK) installed and running, just run the following command:
 
 ```sh
     dfx deploy
