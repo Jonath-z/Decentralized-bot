@@ -49,12 +49,15 @@ const ErrorMessage = Variant({ message: text });
  *
  * @type {*}
  */
-const userConversation = StableBTreeMap(text, Conversation, 1);
+const userConversation = StableBTreeMap(text, Conversation, 0);
 
 export default Canister({
   createConversation: update(
     [ConversationPayload],
-    Result(Conversation, ErrorMessage),
+    Result(
+      Record({ conversation: Conversation, id: text, initiator: text }),
+      ErrorMessage
+    ),
     (payload) => {
       if (typeof payload !== "object" || Object.keys(payload).length === 0) {
         return Err({ message: "Invild payload" });
@@ -62,19 +65,28 @@ export default Canister({
       const message = { ...systemMessage, id: uuidv4() };
       const conversation = { id: uuidv4(), conversation: [message] };
       userConversation.insert(payload.userIdentity, conversation);
-      return Ok(conversation);
+      return Ok({
+        conversation,
+        id: conversation.id,
+        initiator: payload.userIdentity,
+      });
     }
   ),
 
   // The payload is just the user identity
-  getConversations: query(
+  getConversation: query(
     [text],
     Result(Conversation, ErrorMessage),
     (userIdentity) => {
       if (!userIdentity)
         return Err({ message: "Incorrect user identity found" });
-      const conversations = userConversation.get(userIdentity);
-      return Ok(conversations.Some);
+
+      const messages = userConversation.get(userIdentity);
+
+      if ("None" in messages)
+        return Err({ message: `No conversation found for ${userIdentity}` });
+
+      return Ok(messages.Some);
     }
   ),
 

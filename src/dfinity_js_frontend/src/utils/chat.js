@@ -2,15 +2,17 @@ import { localStorageController } from "./localStorageController";
 
 export async function createConversation(userIdentity) {
   try {
-    return await window.canister.chat.createConversation({ userIdentity });
+    return await window.canister.chat.createConversation({
+      userIdentity,
+    });
   } catch (error) {
     console.log(error);
   }
 }
 
-export async function getConversations(userIdentity) {
+export async function getConversation(userIdentity) {
   try {
-    return await window.canister.chat.getConversations(userIdentity);
+    return await window.canister.chat.getConversation(userIdentity);
   } catch (error) {
     console.log(error);
   }
@@ -18,9 +20,8 @@ export async function getConversations(userIdentity) {
 
 export async function addMessageToConversation(message) {
   try {
-    const userIdentity = window.window.auth.principalText;
+    const userIdentity = window.auth.principalText;
     const conversationId = localStorageController("conversation")?.Ok.id;
-    console.log({ userIdentity, conversationId });
     return await window.canister.chat.addMessageToConversation({
       userIdentity,
       conversationId,

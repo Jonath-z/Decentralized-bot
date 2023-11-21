@@ -2,19 +2,21 @@ import React, { useState } from "react";
 import useApi from "../hooks/useApi";
 import Loading from "./Loading";
 import { useEffect } from "react";
-import { localStorageController } from "../utils/localStorageController";
 import { login, logout } from "../utils/auth";
 import toast from "react-hot-toast";
-import { addMessageToConversation } from "../utils/chat";
+import { getConversation } from "../utils/chat";
 
 export default function Chat() {
   const [question, setQuestion] = useState("");
-  const { data, error, loading, chatCompletion, uploading, setData } = useApi();
-  const [chatMessage, setChatMessage] = useState([]);
+  const { loading, chatCompletion, chatMessage, setChatMessage } = useApi();
 
-  const updateChatMessage = () => {
-    const retrievedData = localStorageController("chatData");
-    if (retrievedData !== null) setChatMessage(retrievedData);
+  const updateChatMessage = async () => {
+    if (window.auth.principalText && window.auth.isAuthenticated) {
+      const conversation = await getConversation(window.auth.principalText);
+      if (conversation.Ok) {
+        setChatMessage(conversation.Ok.conversation);
+      }
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -24,43 +26,16 @@ export default function Chat() {
     }
 
     if (question) {
-      event.preventDefault();
-      localStorageController("chatData", [
-        ...chatMessage,
-        { content: question, role: "user" },
-      ]);
-      updateChatMessage();
-      // await addMessageToConversation({ content: question, role: "user" });
-      await chatCompletion(localStorageController("chatData"));
+      const history = [...chatMessage, { content: question, role: "user" }];
+      setChatMessage(() => [...history]);
+      await chatCompletion(history);
       setQuestion("");
     }
   };
 
   useEffect(() => {
-    const chatMessage = localStorageController("chatData");
-    if (!chatMessage) {
-      localStorageController("chatData", [
-        {
-          content:
-            "Hello! 👋 I'm a decentralized chatbot deployed on ICP (Internet Computer Protocol) blockchain",
-          role: "assistant",
-        },
-      ]);
-    }
     updateChatMessage();
   }, []);
-
-  useEffect(() => {
-    if (data) {
-      setChatMessage((prev) => [...prev, { content: data, role: "assistant" }]);
-      localStorageController("chatData", [
-        ...chatMessage,
-        { content: data, role: "assistant" },
-      ]);
-      updateChatMessage();
-      setData("");
-    }
-  }, [data]);
 
   return (
     <div className="wrapper">

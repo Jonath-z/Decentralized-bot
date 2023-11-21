@@ -5,6 +5,7 @@ import { addMessageToConversation } from "../utils/chat";
 
 const useApi = () => {
   const [data, setData] = useState("");
+  const [chatMessage, setChatMessage] = useState([]);
   const [error, setError] = useState();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -13,6 +14,7 @@ const useApi = () => {
     const url = "https://api.openai.com/v1/chat/completions";
     setLoading(true);
     try {
+      await addMessageToConversation(payload.at(-1));
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -20,7 +22,10 @@ const useApi = () => {
           Authorization: "Bearer " + OPEN_AI_API_KEY,
         },
         body: JSON.stringify({
-          messages: payload,
+          messages: payload.map((message) => ({
+            content: message.content,
+            role: message.role,
+          })),
           model: "gpt-3.5-turbo",
           temperature: 1,
         }),
@@ -39,14 +44,14 @@ const useApi = () => {
         content: assistantContent,
         role: "assistant",
       };
-      const res = await addMessageToConversation(messageToSaveFromAssistant);
-      console.log({ res });
+      setChatMessage((prev) => [...prev, messageToSaveFromAssistant]);
+      await addMessageToConversation(messageToSaveFromAssistant);
       setData(assistantContent);
       setError(null);
-    } catch (error) {
-      setError(error);
-    } finally {
       setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      setError(error);
     }
   }, []);
 
@@ -57,6 +62,8 @@ const useApi = () => {
     chatCompletion,
     uploading,
     setData,
+    chatMessage,
+    setChatMessage,
   };
 };
 
