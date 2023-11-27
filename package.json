@@ -54,7 +54,6 @@
     "buffer": "6.0.3",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.3",
-    "dotenv": "^16.0.3",
     "events": "3.3.0",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "5.5.0",
