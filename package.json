@@ -13,6 +13,7 @@
     "prebuild": "dfx generate",
     "start": "webpack serve --mode development --env development",
     "deploy:local": "dfx deploy --network=local",
+    "deploy-backend:local": "AZLE_VERBOSE=true dfx deploy dfinity_js_backend --network=local",
     "deploy:ic": "dfx deploy --network=ic",
     "generate": "dfx generate dfinity_js_backend",
     "gen-deploy:local": "dfx generate dfinity_js_backend && dfx deploy --network=local"
@@ -29,7 +30,8 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
-    "azle": "^0.18.6",
+    "azle": "0.20.2",
+    "express": "^4.18.2",
     "big-number": "^2.0.0",
     "bootstrap": "^5.1.3",
     "bootstrap-icons": "^1.7.1",
@@ -46,6 +48,10 @@
     "web-vitals": "^1.0.1"
   },
   "devDependencies": {
+    "@types/express": "^4.17.21",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.12",
     "@babel/core": "^7.21.8",
     "@babel/preset-env": "^7.21.5",
     "@babel/preset-react": "^7.18.6",
