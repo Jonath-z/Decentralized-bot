@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import { status } from "../utils/status";
-import { Message } from "../utils/type";
 
 class Validator {
   static chat(req: Request, res: Response, next: NextFunction) {
