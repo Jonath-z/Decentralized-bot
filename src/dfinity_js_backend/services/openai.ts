@@ -1,5 +1,7 @@
+import { Some, ic, serialize } from "azle";
 import { systemMessage } from "../utils/ai";
 import { Message } from "../utils/type";
+import { azleFetch } from "azle/src/lib/fetch";
 
 class Openai {
   apiKey: string;
@@ -8,19 +10,48 @@ class Openai {
   }
 
   async chatCompletion({ messages }: { messages: Message[] }) {
-    const req = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.apiKey}`,
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo-0125",
-          messages: [systemMessage, ...messages],
-        }),
-      },
-    });
+    try {
+      const body = JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [systemMessage, ...messages],
+      });
 
-    return await req.json();
+      const response = await fetch(`icp://aaaaa-aa/http_request`, {
+        body: serialize({
+          args: [
+            {
+              url: `https://api.openai.com/v1/chat/completions`,
+              max_response_bytes: [2_000n],
+              method: {
+                post: null,
+              },
+              headers: [
+                {
+                  name: "Content-Type",
+                  value: "application/json",
+                },
+                {
+                  name: "Authorization",
+                  value: "Bearer " + this.apiKey,
+                },
+              ],
+              body: Buffer.from(body, "utf-8"),
+              transform: [
+                {
+                  function: [ic.id(), "transformResponse"],
+                  context: Uint8Array.from([]),
+                },
+              ],
+            },
+          ],
+          cycles: 50_000_000n,
+        }),
+      });
+
+      return await response.json();
+    } catch (err) {
+      console.log(err);
+    }
   }
 }
 

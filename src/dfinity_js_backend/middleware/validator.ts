@@ -10,12 +10,11 @@ class Validator {
         .json({ message: "The list of messages is required" });
     }
 
-    if (body.messages.some())
-      if (!body.userId) {
-        return res.status(status.BAD_REQUEST).json({
-          message: "User id is required",
-        });
-      }
+    if (!body.userId) {
+      return res.status(status.BAD_REQUEST).json({
+        message: "User id is required",
+      });
+    }
 
     if (typeof body.userId !== "string") {
       return res
