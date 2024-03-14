@@ -6,13 +6,7 @@ Dai is a decentralized AI chatbot built on the Internet Computer Protocol (ICP).
 
 ### **Frontend Canister**
 
-### Credentials
-
-Create a **`credential.js`** file in **`/src/dfinity_js_frontend/src/utils`** and set your OpenAI API key as follows:
-
-```js
-export const OPEN_AI_API_KEY = "YOUR_OPEN_AI_API_KEY";
-```
+### Setup
 
 After setting up the frontend credentials, ensure that you have the **`dfx`** command-line tool installed on your computer. Check its version with the following command:
 
@@ -20,6 +14,8 @@ After setting up the frontend credentials, ensure that you have the **`dfx`** co
 dfx --version
 
 ```
+
+Note: The version of `dfx` should be `0.15.0`
 
 If you don't have it installed, follow the instructions in the [ICP SDK installation guide](https://internetcomputer.org/docs/current/developer-docs/setup/install#installing-the-ic-sdk-1).
 

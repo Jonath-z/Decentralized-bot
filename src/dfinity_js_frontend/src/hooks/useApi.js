@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
-import { OPEN_AI_API_KEY } from "../utils/credential";
 import toast from "react-hot-toast";
 import { addMessageToConversation } from "../utils/chat";
+import { decryptData } from "../utils/encryptData";
 
 const useApi = () => {
   const [data, setData] = useState("");
@@ -9,6 +9,8 @@ const useApi = () => {
   const [error, setError] = useState();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const OPEN_AI_API_KEY = () =>
+    decryptData(localStorage.getItem("icp-dai-open-ai"));
 
   const chatCompletion = useCallback(async (payload) => {
     const url = "https://api.openai.com/v1/chat/completions";
@@ -19,7 +21,7 @@ const useApi = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + OPEN_AI_API_KEY,
+          Authorization: "Bearer " + OPEN_AI_API_KEY()?.split('"')[1],
         },
         body: JSON.stringify({
           messages: payload.map((message) => ({

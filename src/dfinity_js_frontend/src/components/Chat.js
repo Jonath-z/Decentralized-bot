@@ -5,9 +5,12 @@ import { useEffect } from "react";
 import { login, logout } from "../utils/auth";
 import toast from "react-hot-toast";
 import { getConversation } from "../utils/chat";
+import TextInput from "./TextInput";
+import { encryptData } from "../utils/encryptData";
 
 export default function Chat() {
   const [question, setQuestion] = useState("");
+  const [openaiKey, setOpenaiKey] = useState("");
   const { loading, chatCompletion, chatMessage, setChatMessage } = useApi();
 
   const updateChatMessage = async () => {
@@ -19,9 +22,16 @@ export default function Chat() {
     }
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (!window.auth.isAuthenticated) {
       toast.error("You are not authenticated");
+      return;
+    }
+
+    const openaiKey = localStorage.getItem("icp-dai-open-ai");
+    if (!openaiKey) {
+      toast.error("No openai key found");
       return;
     }
 
@@ -37,6 +47,22 @@ export default function Chat() {
     updateChatMessage();
   }, []);
 
+  const onValidateOpenaiAPI = (e) => {
+    if (e.target.value.match(/^sk-[a-zA-Z0-9]{32,}$/)) {
+      setOpenaiKey(e.target.value);
+    } else {
+      setOpenaiKey("");
+    }
+  };
+
+  const onSaveOpenaiKey = () => {
+    if (!openaiKey) return toast.error("Invalid Openai key");
+    const encryptedApiKey = encryptData(openaiKey);
+    localStorage.setItem("icp-dai-open-ai", encryptedApiKey);
+    toast.success("Openai key successfully saved and crypted");
+    setOpenaiKey("");
+  };
+
   return (
     <div className="wrapper">
       <div className="wrapper-header">
@@ -46,6 +72,18 @@ export default function Chat() {
           onClick={() => (window.auth.isAuthenticated ? logout() : login())}
         >
           {window.auth.isAuthenticated ? "Log out" : "Login"}
+        </button>
+      </div>
+      <div style={{ display: "flex", gap: 10 }}>
+        <TextInput
+          onChange={onValidateOpenaiAPI}
+          placeholder="Pass your Openai API key here..."
+        />
+        <button
+          className="auth-button auth-button__hover"
+          onClick={onSaveOpenaiKey}
+        >
+          Save
         </button>
       </div>
       <div className="container">
@@ -80,6 +118,7 @@ export default function Chat() {
               type="text"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
+              onKeyDown={(e) => (e.key === "Enter" ? handleSubmit(e) : null)}
             />
             {loading && <Loading />}
             {!loading && (
