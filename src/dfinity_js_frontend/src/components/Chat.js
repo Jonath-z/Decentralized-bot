@@ -16,8 +16,9 @@ export default function Chat() {
   const updateChatMessage = async () => {
     if (window.auth.principalText && window.auth.isAuthenticated) {
       const conversation = await getConversation(window.auth.principalText);
-      if (conversation.Ok) {
-        setChatMessage(conversation.Ok.conversation);
+      console.log(conversation);
+      if (conversation) {
+        setChatMessage(conversation.conversation);
       }
     }
   };
