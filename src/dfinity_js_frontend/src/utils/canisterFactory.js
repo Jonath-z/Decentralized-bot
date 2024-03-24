@@ -1,10 +1,10 @@
 import { HttpAgent, Actor } from "@dfinity/agent";
-import { idlFactory as marketPlaceIDL } from "../../../declarations/dfinity_js_backend/dfinity_js_backend.did.js";
+import { idlFactory as chatIDL } from "../../../declarations/dfinity_js_backend/dfinity_js_backend.did.js";
 
 const CHAT_CANISTER_ID = "bkyz2-fmaaa-aaaaa-qaaaq-cai";
 
 export async function getChatCanister() {
-  return await getCanister(CHAT_CANISTER_ID, marketPlaceIDL);
+  return await getCanister(CHAT_CANISTER_ID, chatIDL);
 }
 
 async function getCanister(canisterId, idl) {
